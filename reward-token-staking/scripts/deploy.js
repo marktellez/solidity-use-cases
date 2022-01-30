@@ -1,26 +1,31 @@
-const {writeFile, readFile} = require("fs/promises");
+const { writeFile, readFile, link, unlink } = require("fs/promises");
 
 async function main() {
-  const web3EnvFile = "../../open-rewards/.env.local"
-
-
+  const web3EnvFile = "../../web3/reward-token-staking/.env.local";
 
   console.log("Deploying Token...");
   const Token = await ethers.getContractFactory("RewardToken");
-  const token = await (await Token.deploy("1000000000000000000000000")).deployed();
+  const token = await (
+    await Token.deploy("1000000000000000000000000")
+  ).deployed();
 
   console.log("Deploying Staking...");
   const Staking = await ethers.getContractFactory("RewardTokenStaking");
   const staking = await (await Staking.deploy(token.address)).deployed();
 
-  const env = (await readFile(web3EnvFile)).toString()
+  const env = (await readFile(web3EnvFile)).toString();
 
   const withAddresses = env
-    .replace(/NEXT_PUBLIC_STAKING_CONTRACT_ADDRESS=.*$/gm, `NEXT_PUBLIC_STAKING_CONTRACT_ADDRESS=${staking.address}`)
-    .replace(/NEXT_PUBLIC_TOKEN_CONTRACT_ADDRESS=.*$/gm, `NEXT_PUBLIC_TOKEN_CONTRACT_ADDRESS=${token.address}`)
+    .replace(
+      /NEXT_PUBLIC_STAKING_CONTRACT_ADDRESS=.*$/gm,
+      `NEXT_PUBLIC_STAKING_CONTRACT_ADDRESS=${staking.address}`
+    )
+    .replace(
+      /NEXT_PUBLIC_TOKEN_CONTRACT_ADDRESS=.*$/gm,
+      `NEXT_PUBLIC_TOKEN_CONTRACT_ADDRESS=${token.address}`
+    );
 
-
-  await writeFile(web3EnvFile, withAddresses)
+  await writeFile(web3EnvFile, withAddresses);
 
   console.log(`
 ------------------------------------------------------------
@@ -29,8 +34,7 @@ CONTRACTS DEPLOYED:
   Staking: ${staking.address}
 ------------------------------------------------------------
 Web3 @ ${web3EnvFile} .env.local updated
-  `)
-  
+  `);
 }
 
 main()

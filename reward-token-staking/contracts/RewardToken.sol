@@ -9,6 +9,8 @@ import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 contract RewardToken is ERC20, Ownable, ERC20Burnable {
     mapping(address => uint256) private _balances;
 
+    event Reward(address to, uint256 amount);
+
     constructor(uint256 initialSupply) ERC20("RewardToken", "RETK") {
         _mint(address(this), initialSupply);
         _balances[address(this)] = initialSupply;
@@ -18,6 +20,8 @@ contract RewardToken is ERC20, Ownable, ERC20Burnable {
         require(_balances[address(this)] >= amount, "NotEnoughTokens");
 
         _transfer(address(this), to, amount);
+
+        emit Reward(to, amount);
     }
 
     function availableSupply() public view returns (uint256) {
